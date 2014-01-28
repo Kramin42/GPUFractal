@@ -6,7 +6,7 @@ import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 import java.awt.Font;
-import java.io.File;
+//import java.io.File;
 import java.util.Random;
 
 import org.lwjgl.Sys;
@@ -201,7 +201,8 @@ public class Main{
     
     private void checkInput(){
     	Fractal fractal = mandelbrot;
-    	Fractal small_fractal = julia;
+    	@SuppressWarnings("unused")
+		Fractal small_fractal = julia;
     	if (!viewingMandelbrot){
     		fractal = julia;
     		small_fractal = mandelbrot;
@@ -313,8 +314,9 @@ public class Main{
     		}
     	}
     }
-
-    private void init(){
+    
+	@SuppressWarnings("unchecked")
+	private void init(){
     	lastFPS = getTime();
         try{
             Display.setDisplayMode(new DisplayMode(w, h));

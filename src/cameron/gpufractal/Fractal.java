@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -23,7 +23,7 @@ import static org.lwjgl.opengl.GL32.*;
 import static org.lwjgl.opengl.GL40.*;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.util.vector.*;
+//import org.lwjgl.util.vector.*;
 
 
 

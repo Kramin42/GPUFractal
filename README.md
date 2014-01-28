@@ -14,4 +14,4 @@ Backspace to undo the last change.
 Q/A changes the maximum iteration, W/S changes the colour transformation parameter.
 hold Ctrl for fine Shift for coarse tuning.
 
-Requires OpenGL 4.0
+Requires an OpenGL 4.0 capable graphics card.
