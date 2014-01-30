@@ -26,6 +26,8 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
 
+import sun.font.CreatedFontTracker;
+
 
 public class Main{
 	
@@ -68,24 +70,25 @@ public class Main{
     
     public Main(){
         init();
-        mandelbrot = new Fractal("shaders/mandelbrot.vert", "shaders/mandelbrot.frag", w-sw,h,4*1920,4*1080,sw,(int) (sw*((float) h)/(w-sw)),true);//A4@600dpi: 7020,4980
-        mandelbrot.transformParam  = 30.0;
-        mandelbrot.centerx = -0.75;
-        mandelbrot.zoom = 0.8;
-        mandelbrot.savePrevState();
-        julia = new Fractal("shaders/julia.vert", "shaders/julia.frag", w-sw,h,4*1920,4*1080,sw,(int) (sw*((float) h)/(w-sw)),true);//A4@600dpi: 7020,4980
-        julia.extraVars = new float[2];
-        julia.extraVars[0] = -0.77f;
-        julia.extraVars[1] = 0.2f;
-        julia.savePrevState();
         
         ByteBuffer buf = null;
 	    
 	    palette=glGenTextures();
 	    glBindTexture( GL_TEXTURE_2D, palette );
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA,palW,palH,0,GL_RGBA,GL_UNSIGNED_INT, buf);
+        
+        mandelbrot = new Fractal("shaders/mandelbrot.vert", "shaders/mandelbrot.frag", palette, w-sw,h,4*1920,4*1080,sw,(int) (sw*((float) h)/(w-sw)),true);//A4@600dpi: 7020,4980
+        mandelbrot.transformParam  = 30.0;
+        mandelbrot.centerx = -0.75;
+        mandelbrot.zoom = 0.8;
+        mandelbrot.savePrevState();
+        julia = new Fractal("shaders/julia.vert", "shaders/julia.frag", palette, w-sw,h,4*1920,4*1080,sw,(int) (sw*((float) h)/(w-sw)),true);//A4@600dpi: 7020,4980
+        julia.extraVars = new float[2];
+        julia.extraVars[0] = -0.77f;
+        julia.extraVars[1] = 0.2f;
+        julia.savePrevState();
 	    
 	    pals.add(palR);
 	    pals.add(palG);
@@ -404,6 +407,16 @@ public class Main{
 	    				mouseDragging = true;
 	    				mdownx = Mouse.getX();
 	    				mdowny = Mouse.getY();
+	    			} else if (!paletteDragging && Mouse.getX()>0 && Mouse.getX()<palW && Mouse.getY()>sw*((float) h)/(w-sw) && Mouse.getY()<sw*((float) h)/(w-sw)+palH){
+	    				// create point in palette
+	    				paletteChannel = 2 - (int)(3*(Mouse.getY() - sw*((float) h)/(w-sw)))/(palH);
+	    				float[] p = {Mouse.getX()/(float)palW,3*(Mouse.getY()-sw*((float) h)/(w-sw)-(2-paletteChannel)*palH/3.0f)/(float)palH};
+	    				int pointA = 0;
+		    			while (pals.get(paletteChannel).get(pointA)[0]<=p[0]){
+		    				pointA++;
+		    			}
+	    				pals.get(paletteChannel).add(pointA, p);
+	    				calcPalette();
 	    			}
     			} else {
     				if (Mouse.getX() >= sw && mouseDragging){
@@ -485,6 +498,12 @@ public class Main{
         			julia.changed = true;
         			mandelbrot.changed = true;
         			break;
+    			case Keyboard.KEY_DELETE:
+    				if (paletteChannel>=0 && palettePoint>0 && palettePoint<pals.get(paletteChannel).size()-1){
+    					pals.get(paletteChannel).remove(palettePoint);
+    					calcPalette();
+    				}
+    				break;
     			}
     		}
     	}

@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 //import static org.lwjgl.opengl.ARBShaderObjects.*;
 //import static org.lwjgl.opengl.ARBVertexShader.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.*;
@@ -38,6 +39,7 @@ public class Fractal {
     int transformParamLocation;
     int matrixLocation;
     int fracPosMatrixLocation;
+    int paletteLocation;
     
     int extraVarsLocation;
     
@@ -69,10 +71,12 @@ public class Fractal {
     int saveRenderTarget;
     int miniRenderTarget;
     
+    int palette;
+    
     double zoomMult = 1.2;
     boolean changed = true;
 
-    public Fractal(String vertexShaderPath, String fragmentShaderPath, int _width, int _height, int _saveW, int _saveH, int _miniW, int _miniH, boolean antialias){
+    public Fractal(String vertexShaderPath, String fragmentShaderPath, int _palette, int _width, int _height, int _saveW, int _saveH, int _miniW, int _miniH, boolean antialias){
     	width = _width;
     	height = _height;
     	saveW = _saveW;
@@ -81,6 +85,7 @@ public class Fractal {
     	miniH = antialias ? 2*_miniH : _miniH;
     	texW = antialias ? 2*width : width;
     	texH = antialias ? 2*height : height;
+    	palette = _palette;
     	
     	int vertShader = 0, fragShader = 0;
     	
@@ -125,6 +130,7 @@ public class Fractal {
 	    transformParamLocation = glGetUniformLocation(program, "transformParam");
 	    matrixLocation = glGetUniformLocation(program, "matrix");
 	    fracPosMatrixLocation = glGetUniformLocation(program, "fracPosMatrix");
+	    paletteLocation = glGetUniformLocation(program, "palette");
 	    
 	    extraVarsLocation = glGetUniformLocation(program, "extraVars");
 	    
@@ -251,7 +257,10 @@ public class Fractal {
         glUniform1f(transformParamLocation, (float) transformParam);
         glUniformMatrix4(matrixLocation, true, getMatrix(width,height));
         glUniformMatrix4(fracPosMatrixLocation, true, getPosMatrix(width,height));
+        glUniform1i(paletteLocation, 0);
         glUniform1(extraVarsLocation, getExtraVarsBuffer(extraVars));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, palette);
         glBegin(GL_QUADS);
 	        glVertex3f( 0.0f,   0.0f, -1.0f);
 	        glVertex3f( width,   0.0f, -1.0f);

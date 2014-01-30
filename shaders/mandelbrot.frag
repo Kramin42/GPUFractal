@@ -9,27 +9,29 @@ uniform float invzoom;
 uniform int maxIteration;
 uniform float transformParam;
 
+uniform sampler2D palette;
+
 in vec2 pos;
 
 out vec4 outputF;
 
-float getColourValue(float mu, float s, float m, float e)
-{
-    if (mu<s) {
-        return 0.0;
-    } else if (mu<m) {
-        return (mu - s)/(m-s);
-    } else if (mu<e) {
-        return 1.0 - (mu - m)/(e-m);
-    }
-    return 0.0;
-}
+//float getColourValue(float mu, float s, float m, float e)
+//{
+//    if (mu<s) {
+//        return 0.0;
+//    } else if (mu<m) {
+//        return (mu - s)/(m-s);
+//    } else if (mu<e) {
+//        return 1.0 - (mu - m)/(e-m);
+//    }
+//    return 0.0;
+//}
 
 void main( void ) {
 	dvec2 c = center + dvec2(pos)*invzoom;
 	dvec2 z = c;
 	int iteration = 0;
-	vec3 colour = vec3(0.0,0.0,0.0);
+	//vec3 colour = vec3(0.0,0.0,0.0);
 	
 	//for periodicity checking
 	//int period = 8;
@@ -75,11 +77,19 @@ void main( void ) {
 		// is independent of maxIteration
 		mu=mu/(mu+transformParam);
 		
-		colour.x = getColourValue(mu,0.4,0.5,1.0);
-		colour.y = getColourValue(mu,0.3,0.5,0.7);
-		colour.z = getColourValue(mu,0.0,0.5,0.6);
+		ivec2 tsize = textureSize(palette,0);
+		
+		int tx, ty;
+		ty = int(mu*tsize.y);
+		tx = int((mu*tsize.y - ty)*tsize.x);
+		
+		//colour.x = getColourValue(mu,0.4,0.5,1.0);
+		//colour.y = getColourValue(mu,0.3,0.5,0.7);
+		//colour.z = getColourValue(mu,0.0,0.5,0.6);
+		outputF = texelFetch(palette,ivec2(tx,ty),0);
+	} else {
+		outputF = vec4( 0.0, 0.0, 0.0, 1.0 );
 	}
 	
-	
-  outputF = vec4( colour.x, colour.y, colour.z, 1.0 );
+  //outputF = vec4( colour.x, colour.y, colour.z, 1.0 );
 }
